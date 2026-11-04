@@ -235,7 +235,7 @@ export default function Home() {
                 audience: "I'm a Seller",
                 description: "Create a listing and help your materials find a new use.",
                 steps: sellerSteps,
-                href: "/seller",
+                href: "/auth?mode=register&role=seller",
                 cta: "Start Selling",
                 icon: "🌱",
               },

@@ -38,7 +38,7 @@ const navigationItems = [
     ),
   },
   {
-    label: "Settings",
+    label: "My Account",
     href: "/settings",
     icon: (
       <>

@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FarmLoop
 
-## Getting Started
+FarmLoop connects agricultural by-products with buyers. It is built with Next.js, TypeScript, Supabase Auth, and PostgreSQL.
 
-First, run the development server:
+## Set up Supabase
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. Create a Supabase project.
+2. Copy `.env.example` to `.env.local` and set your project URL, publishable key, and site URL. Never put a Supabase service-role key in a `NEXT_PUBLIC_` variable.
+3. Run the SQL files in `supabase/migrations` in timestamp order in the Supabase SQL Editor, or apply them with the Supabase CLI. The profile backfill migration creates profiles for accounts that existed before the profile trigger was installed.
+4. In Supabase Authentication settings, enable email/password sign-in and add `http://localhost:3000/auth/callback` and your deployed `/auth/callback` URL to the allowed redirect URLs.
+5. Start the app with `npm run dev`.
+
+Without Supabase environment variables, the public marketplace continues to show its local sample listings. Authentication and the seller/admin dashboards require the Supabase project and migration.
+
+## Account roles
+
+- **Buyer:** create an account to continue to the marketplace.
+- **Seller:** create an account to manage listings drawn from the shared catalogue. Published listings appear in the marketplace.
+- **Admin:** sign in at `/admin/login` using an account provisioned through a trusted database operation. Public registration intentionally does not offer administrator privileges.
+
+To provision an administrator, create the Auth user through the Supabase Dashboard (Authentication → Users), confirm its email, and then run this statement in the Supabase SQL Editor, replacing the email address. Do not use the public signup form to provision administrator accounts:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = (
+  select id from auth.users where email = 'admin@example.com'
+);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The database creates profiles on signup and enforces row-level security for profiles, seller listings, and the admin-managed catalogue. Public users cannot grant themselves an administrator role.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Admin pages are available at `/admin/dashboard`, `/admin/catalogue`, `/admin/users`, and `/admin/listings`. The dashboard uses the existing profile, catalogue, and seller-listing tables. Admins can view buyer/seller account details and activity, suspend or reactivate those accounts, and moderate individual listings separately. Suspending a seller hides their active listings without changing each listing's moderation status. Administrator actions and account status changes are recorded in the admin history.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The current marketplace has no checkout flow or orders table, so buyer order history is not available yet. Seller verification and advanced moderation are also not part of this release.
 
-## Learn More
+Run the new `20261104000000_admin_account_management.sql` migration after the existing migrations to add account email/status fields, activity and audit logs, suspension enforcement, and admin-only account operations.
 
-To learn more about Next.js, take a look at the following resources:
+## Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```

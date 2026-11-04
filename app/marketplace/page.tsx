@@ -1,21 +1,21 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { SiteHeader } from "@/components/site-header";
 import { MarketplaceBrowser } from "@/components/marketplace/marketplace-browser";
-import { getAvailableListings } from "@/lib/data/marketplace";
+import { getMarketplaceListings } from "@/lib/data/supabase-marketplace";
 
 export const metadata: Metadata = {
   title: "Marketplace | FarmLoop",
   description: "Browse available agricultural by-products from local sellers.",
 };
 
-export default function MarketplacePage() {
-  const listings = getAvailableListings();
+async function MarketplaceContent() {
+  await connection();
+  const listings = await getMarketplaceListings();
 
   return (
-    <div className="min-h-screen">
-      <SiteHeader />
-      <main className="mx-auto max-w-7xl px-6 py-10 sm:px-10 sm:py-14 lg:px-12">
+    <>
         <div className="flex flex-col justify-between gap-6 border-b border-[#e3e9df] pb-8 md:flex-row md:items-end">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#78916c]">The marketplace</p>
@@ -31,6 +31,18 @@ export default function MarketplacePage() {
         </div>
         <Suspense fallback={<div className="pt-8 text-sm text-[#778278]">Loading materials...</div>}>
           <MarketplaceBrowser listings={listings} />
+        </Suspense>
+    </>
+  );
+}
+
+export default function MarketplacePage() {
+  return (
+    <div className="min-h-screen">
+      <SiteHeader />
+      <main className="mx-auto max-w-7xl px-6 py-10 sm:px-10 sm:py-14 lg:px-12">
+        <Suspense fallback={<div className="pt-8 text-sm text-[#778278]">Loading marketplace...</div>}>
+          <MarketplaceContent />
         </Suspense>
       </main>
     </div>
