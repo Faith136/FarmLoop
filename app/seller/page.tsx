@@ -21,13 +21,18 @@ async function SellerWorkspace() {
     (profile.role === "admin"
       ? supabase
           .from("seller_listings")
-          .select("id, seller_id, seller_name, seller_email, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
+          .select("id, seller_id, seller_name, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
       : supabase
       .from("seller_listings")
-      .select("id, seller_id, seller_name, seller_email, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
+      .select("id, seller_id, seller_name, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
       .eq("seller_id", user.id))
       .order("created_at", { ascending: false }),
   ]);
+  const { data: orders, error: ordersError } = await supabase
+    .from("orders")
+    .select("id, listing_id, product_id, buyer_id, seller_id, buyer_name, seller_name, product_name, unit, requested_quantity, unit_price, estimated_total, buyer_message, seller_message, status, proposed_quantity, proposed_unit_price, confirmed_at, created_at, updated_at")
+    .eq("seller_id", user.id)
+    .order("created_at", { ascending: false });
 
   if (productsResult.error) {
     throw new Error(`Could not load the product catalogue: ${productsResult.error.message}`);
@@ -35,11 +40,15 @@ async function SellerWorkspace() {
   if (listingsResult.error) {
     throw new Error(`Could not load your listings: ${listingsResult.error.message}`);
   }
+  if (ordersError) {
+    throw new Error(`Could not load your order requests: ${ordersError.message}`);
+  }
 
   return (
     <SellerDashboard
       isAdmin={profile.role === "admin"}
       listings={listingsResult.data}
+      orders={orders}
       products={productsResult.data}
     />
   );
@@ -53,7 +62,7 @@ export default function SellerPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#78916c]">Seller workspace</p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-[#213d2b] sm:text-5xl">Your products, in one place.</h1>
         <p className="mt-4 max-w-2xl leading-7 text-[#68766b]">
-          Publish products from the shared catalogue, manage availability, and reach buyers in the marketplace.
+          Publish products from the shared catalogue, manage order requests, and coordinate accepted orders privately.
         </p>
         <div className="mt-8">
           <Suspense fallback={<p className="text-sm text-[#778278]">Loading your seller workspace…</p>}>

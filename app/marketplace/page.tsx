@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { SiteHeader } from "@/components/site-header";
 import { MarketplaceBrowser } from "@/components/marketplace/marketplace-browser";
 import { getMarketplaceListings } from "@/lib/data/supabase-marketplace";
+import { requireUser } from "@/lib/auth/server";
 
 export const metadata: Metadata = {
   title: "Marketplace | FarmLoop",
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 
 async function MarketplaceContent() {
   await connection();
+  const { profile } = await requireUser();
   const listings = await getMarketplaceListings();
 
   return (
@@ -30,7 +32,7 @@ async function MarketplaceContent() {
           </p>
         </div>
         <Suspense fallback={<div className="pt-8 text-sm text-[#778278]">Loading materials...</div>}>
-          <MarketplaceBrowser listings={listings} />
+          <MarketplaceBrowser canRequest={profile.role === "buyer"} listings={listings} />
         </Suspense>
     </>
   );

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { AdminDashboard } from "@/app/admin/admin-dashboard";
 import { AdminLayout } from "@/app/admin/admin-layout";
 import { requireRole } from "@/lib/auth/server";
+import { getAllConfirmedOrders } from "@/lib/data/admin-orders";
 
 export const metadata: Metadata = {
   title: "Admin dashboard | FarmLoop",
@@ -10,8 +12,9 @@ export const metadata: Metadata = {
 };
 
 async function AdminOverview() {
+  await connection();
   const { supabase } = await requireRole("admin");
-  const [profilesResult, productsResult, listingsResult, actionsResult] =
+  const [profilesResult, productsResult, listingsResult, actionsResult, orders] =
     await Promise.all([
       supabase
         .from("profiles")
@@ -23,13 +26,14 @@ async function AdminOverview() {
         .order("name"),
       supabase
         .from("seller_listings")
-        .select("id, seller_id, seller_name, seller_email, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
+        .select("id, seller_id, seller_name, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
         .order("created_at", { ascending: false }),
       supabase
         .from("admin_action_log")
         .select("id, actor_id, action, target_type, target_id, occurred_at")
         .order("occurred_at", { ascending: false })
         .limit(12),
+      getAllConfirmedOrders(supabase),
     ]);
 
   if (profilesResult.error) {
@@ -44,11 +48,11 @@ async function AdminOverview() {
   if (actionsResult.error) {
     throw new Error(`Could not load admin action history: ${actionsResult.error.message}`);
   }
-
   return (
     <AdminDashboard
       adminActions={actionsResult.data}
       listings={listingsResult.data}
+      orders={orders}
       products={productsResult.data}
       profiles={profilesResult.data}
     />

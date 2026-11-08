@@ -24,7 +24,6 @@ export interface SellerListing {
     id: string;
     name: string;
     location: string;
-    email: string;
   };
   quantityAvailable: number;
   unit: ListingUnit;

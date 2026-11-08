@@ -12,9 +12,10 @@ export async function getMarketplaceListings(): Promise<MarketplaceListing[]> {
   const today = new Date().toISOString().slice(0, 10);
   const { data: listings, error } = await supabase
     .from("seller_listings")
-    .select("id, seller_id, seller_name, seller_email, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status")
+    .select("id, seller_id, seller_name, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status")
     .eq("status", "active")
     .gt("quantity_available", 0)
+    .lte("available_from", today)
     .gte("available_until", today)
     .order("created_at", { ascending: false });
 
@@ -55,7 +56,6 @@ export async function getMarketplaceListings(): Promise<MarketplaceListing[]> {
         id: listing.seller_id,
         name: listing.seller_name,
         location: listing.location,
-        email: listing.seller_email,
       },
       quantityAvailable: listing.quantity_available,
       unit: listing.unit,

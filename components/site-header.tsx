@@ -56,8 +56,8 @@ async function SiteHeaderContent() {
       }
 
       account = {
-        href: profile.role === "admin" ? "/admin" : profile.role === "seller" ? "/seller" : "/marketplace",
-        label: profile.role === "admin" ? "Admin dashboard" : profile.role === "seller" ? "Seller workspace" : "Marketplace",
+        href: profile.role === "admin" ? "/admin" : profile.role === "seller" ? "/seller" : "/buyer",
+        label: profile.role === "admin" ? "Admin dashboard" : profile.role === "seller" ? "Seller workspace" : "Buyer workspace",
         displayName: profile.display_name,
         role: profile.role,
       };
@@ -84,11 +84,10 @@ async function SiteHeaderContent() {
           </Link>
           {account ? (
             <>
-              {account.role !== "buyer" && (
-                <Link className="hidden text-sm font-semibold text-[#315c3b] transition hover:text-[#24492e] sm:block" href={account.href}>
-                  {account.label}
-                </Link>
-              )}
+              <Link className="whitespace-nowrap text-xs font-semibold text-[#315c3b] transition hover:text-[#24492e] sm:text-sm" href={account.href}>
+                <span className="sm:hidden">Workspace</span>
+                <span className="hidden sm:inline">{account.label}</span>
+              </Link>
               <Link
                 aria-label={`My account: ${account.displayName}, ${account.role}`}
                 className="hidden max-w-48 items-center gap-2 rounded-full border border-[#d6dfd1] bg-white py-1.5 pl-1.5 pr-3 transition hover:bg-[#f0f4ed] lg:flex"

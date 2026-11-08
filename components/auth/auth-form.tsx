@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   loginAccount,
@@ -176,17 +175,6 @@ export function AuthForm({
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-[#778278]">
-        Browse without an account?{" "}
-        <Link className="font-semibold text-[#315c3b] underline underline-offset-4" href="/marketplace">
-          Visit the marketplace
-        </Link>
-      </p>
-      {mode === "login" && (
-        <p className="mt-4 text-center text-xs leading-5 text-[#89948a]">
-          Administrator access is available to accounts provisioned by a FarmLoop administrator.
-        </p>
-      )}
     </section>
   );
 }

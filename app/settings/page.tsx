@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { SiteHeader } from "@/components/site-header";
 import { DeleteAccountControl } from "@/components/auth/delete-account-control";
 import { getProfile, requireUser } from "@/lib/auth/server";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 };
 
 async function AccountProfile() {
+  await connection();
   const { user } = await requireUser();
   const profile = await getProfile(user);
   const workspaceHref =
@@ -18,7 +20,7 @@ async function AccountProfile() {
       ? "/admin"
       : profile.role === "seller"
         ? "/seller"
-        : "/marketplace";
+        : "/buyer";
 
   return (
     <>
@@ -47,23 +49,23 @@ async function AccountProfile() {
           </div>
           <dl className="grid gap-5 pt-6 sm:grid-cols-2">
             <div>
-              <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#778278]">
+              <dt className="text-xs font-semibold uppercase tracking-widest text-[#778278]">
                 Name
               </dt>
-              <dd className="mt-1 break-words text-sm text-[#213d2b]">
+              <dd className="mt-1 wrap-break-word text-sm text-[#213d2b]">
                 {profile.display_name}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#778278]">
+              <dt className="text-xs font-semibold uppercase tracking-widest text-[#778278]">
                 Email
               </dt>
-              <dd className="mt-1 break-words text-sm text-[#213d2b]">
+              <dd className="mt-1 wrap-break-word text-sm text-[#213d2b]">
                 {user.email ?? "Not available"}
               </dd>
             </div>
             <div>
-              <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#778278]">
+              <dt className="text-xs font-semibold uppercase tracking-widest text-[#778278]">
                 Account type
               </dt>
               <dd className="mt-1 text-sm capitalize text-[#213d2b]">
@@ -76,7 +78,7 @@ async function AccountProfile() {
           className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-[#315c3b] px-5 text-sm font-semibold text-white transition hover:bg-[#24492e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315c3b]"
           href={workspaceHref}
         >
-          Go to {profile.role === "seller" ? "seller workspace" : profile.role === "admin" ? "admin dashboard" : "marketplace"}
+          Go to {profile.role === "seller" ? "seller workspace" : profile.role === "admin" ? "admin dashboard" : "buyer workspace"}
         </Link>
         {(profile.role === "buyer" || profile.role === "seller") && (
           <section

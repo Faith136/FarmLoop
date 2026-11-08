@@ -11,9 +11,10 @@ import { ListingCard } from "@/components/marketplace/listing-card";
 
 interface MarketplaceBrowserProps {
   listings: MarketplaceListing[];
+  canRequest: boolean;
 }
 
-export function MarketplaceBrowser({ listings }: MarketplaceBrowserProps) {
+export function MarketplaceBrowser({ listings, canRequest }: MarketplaceBrowserProps) {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("search") ?? "";
   const categoryParam = searchParams.get("category");
@@ -22,6 +23,7 @@ export function MarketplaceBrowser({ listings }: MarketplaceBrowserProps) {
   return (
     <MarketplaceBrowserContent
       category={initialCategory}
+      canRequest={canRequest}
       key={`${initialQuery}:${initialCategory ?? ""}`}
       listings={listings}
       query={initialQuery}
@@ -33,12 +35,14 @@ interface MarketplaceBrowserContentProps {
   category?: MarketplaceCategory;
   listings: MarketplaceListing[];
   query: string;
+  canRequest: boolean;
 }
 
 function MarketplaceBrowserContent({
   category: initialCategory,
   listings,
   query: initialQuery,
+  canRequest,
 }: MarketplaceBrowserContentProps) {
   const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState<MarketplaceCategory | "All materials">(initialCategory ?? "All materials");
@@ -112,7 +116,7 @@ function MarketplaceBrowserContent({
       {filteredListings.length > 0 ? (
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
+            <ListingCard canRequest={canRequest} key={listing.id} listing={listing} />
           ))}
         </div>
       ) : (

@@ -14,7 +14,7 @@ async function ListingsTable() {
   const [listingsResult, productsResult] = await Promise.all([
     supabase
       .from("seller_listings")
-      .select("id, seller_id, seller_name, seller_email, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
+      .select("id, seller_id, seller_name, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
       .order("created_at", { ascending: false }),
     supabase.from("catalogue_products").select("id, name"),
   ]);
@@ -51,7 +51,6 @@ async function ListingsTable() {
               </td>
               <td className="px-5 py-4 text-[#667468]">
                 <span className="block font-medium text-[#344a38]">{listing.seller_name}</span>
-                <span className="text-xs">{listing.seller_email}</span>
               </td>
               <td className="px-5 py-4 text-[#667468]">
                 {listing.quantity_available} {listing.unit}

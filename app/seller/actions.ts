@@ -69,7 +69,6 @@ export async function createSellerListing(
   const { error } = await supabase.from("seller_listings").insert({
     seller_id: user.id,
     seller_name: profile.display_name,
-    seller_email: user.email ?? "",
     product_id: productId,
     quantity_available: quantity,
     unit,

@@ -41,16 +41,34 @@ async function AccountDetails({ id }: { id: string }) {
     notFound();
   }
 
-  const { data: activity, error: activityError } = await supabase
-    .from("account_activity")
-    .select("id, profile_id, actor_id, event_type, occurred_at")
-    .eq("profile_id", profile.id)
-    .order("occurred_at", { ascending: false })
-    .limit(50);
+  const [activityResult, transactionsResult] = await Promise.all([
+    supabase
+      .from("account_activity")
+      .select("id, profile_id, actor_id, event_type, occurred_at")
+      .eq("profile_id", profile.id)
+      .order("occurred_at", { ascending: false })
+      .limit(50),
+    profile.role === "seller"
+      ? supabase
+          .from("orders")
+          .select("id, listing_id, product_id, buyer_id, seller_id, buyer_name, seller_name, product_name, unit, requested_quantity, unit_price, estimated_total, buyer_message, seller_message, status, proposed_quantity, proposed_unit_price, confirmed_at, created_at, updated_at")
+          .eq("seller_id", profile.id)
+          .order("created_at", { ascending: false })
+      : supabase
+          .from("orders")
+          .select("id, listing_id, product_id, buyer_id, seller_id, buyer_name, seller_name, product_name, unit, requested_quantity, unit_price, estimated_total, buyer_message, seller_message, status, proposed_quantity, proposed_unit_price, confirmed_at, created_at, updated_at")
+          .eq("buyer_id", profile.id)
+          .order("created_at", { ascending: false }),
+  ]);
 
-  if (activityError) {
-    throw new Error(`Could not load account activity: ${activityError.message}`);
+  if (activityResult.error) {
+    throw new Error(`Could not load account activity: ${activityResult.error.message}`);
   }
+  if (transactionsResult.error) {
+    throw new Error(`Could not load marketplace transactions: ${transactionsResult.error.message}`);
+  }
+  const activity = activityResult.data;
+  const transactions = transactionsResult.data;
 
   const actorIds = [
     ...new Set(
@@ -80,7 +98,7 @@ async function AccountDetails({ id }: { id: string }) {
   if (profile.role === "seller") {
     const { data, error } = await supabase
       .from("seller_listings")
-      .select("id, seller_id, seller_name, seller_email, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
+      .select("id, seller_id, seller_name, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status, created_at, updated_at")
       .eq("seller_id", profile.id)
       .order("created_at", { ascending: false });
 
@@ -113,7 +131,7 @@ async function AccountDetails({ id }: { id: string }) {
       <section aria-label="Account details" className="rounded-3xl border border-[#e3e9df] bg-white p-6 shadow-sm sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#778278]">Account holder</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#778278]">Account holder</p>
             <h2 className="mt-1 text-2xl font-semibold text-[#213d2b]">{account.display_name}</h2>
             <p className="mt-1 break-all text-sm text-[#68766b]">{account.email ?? "Email unavailable"}</p>
           </div>
@@ -123,15 +141,15 @@ async function AccountDetails({ id }: { id: string }) {
         </div>
         <dl className="mt-6 grid gap-5 border-t border-[#edf0ea] pt-6 sm:grid-cols-3">
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#778278]">Account type</dt>
+            <dt className="text-xs font-semibold uppercase tracking-widest text-[#778278]">Account type</dt>
             <dd className="mt-1 capitalize text-sm text-[#213d2b]">{account.role}</dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#778278]">Joined</dt>
+            <dt className="text-xs font-semibold uppercase tracking-widest text-[#778278]">Joined</dt>
             <dd className="mt-1 text-sm text-[#213d2b]">{formatDate(account.created_at)}</dd>
           </div>
           <div>
-            <dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#778278]">Last sign-in</dt>
+            <dt className="text-xs font-semibold uppercase tracking-widest text-[#778278]">Last sign-in</dt>
             <dd className="mt-1 text-sm text-[#213d2b]">{formatDate(account.last_login_at)}</dd>
           </div>
         </dl>
@@ -144,7 +162,7 @@ async function AccountDetails({ id }: { id: string }) {
         <section>
           <h2 className="text-xl font-semibold text-[#2d4532]">Seller listings</h2>
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e4e9e1] bg-white">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-160 text-left text-sm">
               <thead className="bg-[#f7f8f3] text-xs uppercase tracking-wide text-[#778278]">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Product</th>
@@ -172,13 +190,63 @@ async function AccountDetails({ id }: { id: string }) {
           </div>
         </section>
       ) : (
-        <section className="rounded-2xl border border-dashed border-[#d8e1d4] bg-white/70 p-6">
-          <h2 className="text-lg font-semibold text-[#2d4532]">Buyer orders</h2>
-          <p className="mt-2 text-sm leading-6 text-[#778278]">
-            Orders are not available yet. FarmLoop does not currently have checkout or order storage, so there are no buyer orders to display.
-          </p>
-        </section>
+        null
       )}
+
+      <section>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold text-[#2d4532]">
+              {account.role === "seller" ? "Marketplace sales" : "Purchase activity"}
+            </h2>
+            <p className="mt-1 text-sm text-[#778278]">
+              {transactions.length} order{transactions.length === 1 ? "" : "s"} · includes pending, confirmed, completed, and rejected requests
+            </p>
+          </div>
+          <Link className="text-sm font-semibold text-[#315c3b] underline underline-offset-4" href={`/admin/orders?${account.role}=${account.id}`}>
+            View in transaction report
+          </Link>
+        </div>
+        <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e4e9e1] bg-white">
+          <table className="w-full min-w-205 text-left text-sm">
+            <thead className="bg-[#f7f8f3] text-xs uppercase tracking-wide text-[#778278]">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Product</th>
+                <th className="px-4 py-3 font-semibold">{account.role === "seller" ? "Buyer" : "Seller"}</th>
+                <th className="px-4 py-3 font-semibold">Quantity</th>
+                <th className="px-4 py-3 font-semibold">Unit price</th>
+                <th className="px-4 py-3 font-semibold">Total</th>
+                <th className="px-4 py-3 font-semibold">Confirmed</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 font-semibold">Details</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#edf0ea]">
+              {transactions.map((transaction) => (
+                <tr key={transaction.id}>
+                  <td className="px-4 py-4 font-medium text-[#344a38]">{transaction.product_name}</td>
+                  <td className="px-4 py-4 text-[#667468]">{account.role === "seller" ? transaction.buyer_name : transaction.seller_name}</td>
+                  <td className="px-4 py-4 text-[#667468]">{transaction.requested_quantity.toLocaleString("en-KE")} {transaction.unit}</td>
+                  <td className="px-4 py-4 text-[#667468]">KSh {transaction.unit_price.toLocaleString("en-KE")}</td>
+                  <td className="px-4 py-4 text-[#667468]">KSh {transaction.estimated_total.toLocaleString("en-KE")}</td>
+                  <td className="px-4 py-4 text-[#667468]">
+                    {transaction.confirmed_at
+                      ? formatDate(transaction.confirmed_at)
+                      : "—"}
+                  </td>
+                  <td className="px-4 py-4 capitalize text-[#667468]">{transaction.status.replaceAll("_", " ")}</td>
+                  <td className="px-4 py-4">
+                    <Link className="font-semibold text-[#315c3b] underline underline-offset-4" href={`/admin/orders/${transaction.id}`}>Open</Link>
+                  </td>
+                </tr>
+              ))}
+              {transactions.length === 0 && (
+                <tr><td className="px-5 py-8 text-center text-[#778278]" colSpan={8}>No order activity for this account.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section>
         <h2 className="text-xl font-semibold text-[#2d4532]">Account activity</h2>

@@ -54,7 +54,7 @@ const sellerListings: SellerListing[] = [
   {
     id: "listing-maize-kitale",
     productId: "maize-stalks",
-    seller: { id: "seller-wanjiku", name: "Wanjiku Farm", location: "Kitale, Trans-Nzoia", email: "hello@wanjikufarm.example" },
+    seller: { id: "seller-wanjiku", name: "Wanjiku Farm", location: "Kitale, Trans-Nzoia" },
     quantityAvailable: 500,
     unit: "kg",
     pricePerUnit: 3,
@@ -66,7 +66,7 @@ const sellerListings: SellerListing[] = [
   {
     id: "listing-maize-eldoret",
     productId: "maize-stalks",
-    seller: { id: "seller-cherono", name: "Cherono Family Farm", location: "Eldoret, Uasin Gishu", email: "farm@cheronofamily.example" },
+    seller: { id: "seller-cherono", name: "Cherono Family Farm", location: "Eldoret, Uasin Gishu" },
     quantityAvailable: 1.5,
     unit: "tonne",
     pricePerUnit: 2800,
@@ -78,7 +78,7 @@ const sellerListings: SellerListing[] = [
   {
     id: "listing-rice-kirinyaga",
     productId: "rice-husks",
-    seller: { id: "seller-mwangi", name: "Mwea Growers Co-op", location: "Mwea, Kirinyaga", email: "orders@mweagrowers.example" },
+    seller: { id: "seller-mwangi", name: "Mwea Growers Co-op", location: "Mwea, Kirinyaga" },
     quantityAvailable: 20,
     unit: "bag",
     pricePerUnit: 250,
@@ -90,7 +90,7 @@ const sellerListings: SellerListing[] = [
   {
     id: "listing-poultry-eldoret",
     productId: "poultry-manure",
-    seller: { id: "seller-kiptoo", name: "Green Ridge Poultry", location: "Eldoret, Uasin Gishu", email: "sales@greenridge.example" },
+    seller: { id: "seller-kiptoo", name: "Green Ridge Poultry", location: "Eldoret, Uasin Gishu" },
     quantityAvailable: 35,
     unit: "bag",
     pricePerUnit: 450,
@@ -102,7 +102,7 @@ const sellerListings: SellerListing[] = [
   {
     id: "listing-dairy-nakuru",
     productId: "dairy-manure",
-    seller: { id: "seller-njeri", name: "Njeri's Dairy", location: "Nakuru, Nakuru County", email: "farm@njerisdairy.example" },
+    seller: { id: "seller-njeri", name: "Njeri's Dairy", location: "Nakuru, Nakuru County" },
     quantityAvailable: 0,
     unit: "tonne",
     pricePerUnit: 1800,
@@ -114,7 +114,7 @@ const sellerListings: SellerListing[] = [
   {
     id: "listing-coffee-nyeri",
     productId: "coffee-husks",
-    seller: { id: "seller-kamau", name: "Kamau Coffee Works", location: "Othaya, Nyeri", email: "hello@kamaucoffee.example" },
+    seller: { id: "seller-kamau", name: "Kamau Coffee Works", location: "Othaya, Nyeri" },
     quantityAvailable: 800,
     unit: "kg",
     pricePerUnit: 8,
@@ -126,7 +126,7 @@ const sellerListings: SellerListing[] = [
   {
     id: "listing-bagasse-kakamega",
     productId: "sugarcane-bagasse",
-    seller: { id: "seller-otieno", name: "Mumias Cane Collective", location: "Mumias, Kakamega", email: "trade@mumiascane.example" },
+    seller: { id: "seller-otieno", name: "Mumias Cane Collective", location: "Mumias, Kakamega" },
     quantityAvailable: 0.8,
     unit: "tonne",
     pricePerUnit: 3200,

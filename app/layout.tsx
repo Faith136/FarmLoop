@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Suspense } from "react";
+import { ChatWidget } from "@/components/assistant/chat-widget";
 import { MobileBottomNav } from "@/components/navigation/mobile-bottom-nav";
 import "./globals.css";
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={null}>
           <MobileBottomNav />
         </Suspense>
+        <ChatWidget />
       </body>
     </html>
   );

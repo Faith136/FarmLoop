@@ -36,7 +36,8 @@ export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const isAdminLogin = pathname === "/admin/login";
   const requiresAuthentication =
-    !isAdminLogin && /^\/(admin|seller|buyer|settings)(\/|$)/.test(pathname);
+    !isAdminLogin &&
+    /^\/(admin|seller|buyer|settings|marketplace)(\/|$)/.test(pathname);
 
   if (requiresAuthentication && (error || !data.user)) {
     const loginUrl = request.nextUrl.clone();

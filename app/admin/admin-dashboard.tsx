@@ -12,15 +12,18 @@ import { MARKETPLACE_CATEGORIES } from "@/lib/domain/marketplace";
 import type {
   AdminActionLogRow,
   CatalogueProductRow,
+  OrderRow,
   Profile,
   SellerListingRow,
 } from "@/lib/supabase/database.types";
+import { AdminTransactionStats } from "@/components/admin/admin-transaction-stats";
 
 interface AdminDashboardProps {
   profiles: Profile[];
   products: CatalogueProductRow[];
   listings: SellerListingRow[];
   adminActions: AdminActionLogRow[];
+  orders?: OrderRow[];
   catalogueOnly?: boolean;
 }
 
@@ -42,6 +45,7 @@ export function AdminDashboard({
   products,
   listings,
   adminActions,
+  orders = [],
   catalogueOnly = false,
 }: AdminDashboardProps) {
   const router = useRouter();
@@ -92,6 +96,8 @@ export function AdminDashboard({
         <p aria-live="polite" className="rounded-xl bg-[#edf4e9] px-4 py-3 text-sm text-[#315c3b]">{notice.success}</p>
       )}
 
+      {!catalogueOnly && <AdminTransactionStats orders={orders} profiles={profiles} />}
+
       {!catalogueOnly && (
         <section aria-label="Marketplace statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {[
@@ -113,7 +119,7 @@ export function AdminDashboard({
       {!catalogueOnly && <section>
         <h2 className="text-xl font-semibold text-[#2d4532]">Seller activity</h2>
         <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e4e9e1] bg-white">
-          <table className="w-full min-w-[560px] text-left text-sm">
+          <table className="w-full min-w-140 text-left text-sm">
             <thead className="bg-[#f7f8f3] text-xs uppercase tracking-wide text-[#778278]">
               <tr><th className="px-5 py-3 font-semibold">Seller</th><th className="px-5 py-3 font-semibold">Listings</th><th className="px-5 py-3 font-semibold">Last sign-in</th></tr>
             </thead>
@@ -194,7 +200,7 @@ export function AdminDashboard({
         <section>
           <h2 className="text-xl font-semibold text-[#2d4532]">Recent admin actions</h2>
           <div className="mt-4 overflow-x-auto rounded-2xl border border-[#e4e9e1] bg-white">
-            <table className="w-full min-w-[560px] text-left text-sm">
+            <table className="w-full min-w-140 text-left text-sm">
               <thead className="bg-[#f7f8f3] text-xs uppercase tracking-wide text-[#778278]">
                 <tr>
                   <th className="px-5 py-3 font-semibold">Action</th>

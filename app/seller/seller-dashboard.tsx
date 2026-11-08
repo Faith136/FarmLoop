@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   createSellerListing,
   deleteSellerListing,
@@ -11,19 +12,22 @@ import {
 import { MARKETPLACE_CATEGORIES } from "@/lib/domain/marketplace";
 import type {
   CatalogueProductRow,
+  OrderRow,
   SellerListingRow,
 } from "@/lib/supabase/database.types";
+import { OrderList } from "@/components/orders/order-list";
 
 interface SellerDashboardProps {
   isAdmin: boolean;
   products: CatalogueProductRow[];
   listings: SellerListingRow[];
-}
+  orders: OrderRow[];
+};
 
 const fieldClass =
   "mt-1.5 h-11 w-full rounded-xl border border-[#dfe6dc] bg-white px-3 text-sm text-[#2d4532] outline-none focus:border-[#8eaa83] focus:ring-4 focus:ring-[#e9f0e5]";
 
-export function SellerDashboard({ isAdmin, products, listings }: SellerDashboardProps) {
+export function SellerDashboard({ isAdmin, products, listings, orders }: SellerDashboardProps) {
   const router = useRouter();
   const [notice, setNotice] = useState<SellerActionResult>({});
   const [isPending, startTransition] = useTransition();
@@ -54,6 +58,32 @@ export function SellerDashboard({ isAdmin, products, listings }: SellerDashboard
       )}
       {notice.success && (
         <p aria-live="polite" className="rounded-xl bg-[#edf4e9] px-4 py-3 text-sm text-[#315c3b]">{notice.success}</p>
+      )}
+
+      {!isAdmin && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link className="rounded-2xl border border-[#e4e9e1] bg-white p-4 transition hover:border-[#cbd8c5]" href="/messages">
+            <p className="text-sm font-semibold text-[#315c3b]">Messages</p>
+            <p className="mt-1 text-xs text-[#778278]">Open private conversations with buyers.</p>
+          </Link>
+          <Link className="rounded-2xl border border-[#e4e9e1] bg-white p-4 transition hover:border-[#cbd8c5]" href="/notifications">
+            <p className="text-sm font-semibold text-[#315c3b]">Notifications</p>
+            <p className="mt-1 text-xs text-[#778278]">See new order requests and messages.</p>
+          </Link>
+        </div>
+      )}
+
+      {!isAdmin && (
+        <section aria-labelledby="seller-order-requests">
+          <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-semibold text-[#2d4532]" id="seller-order-requests">Order requests</h2>
+              <p className="mt-1 text-sm text-[#778278]">Accept, decline, or propose a change. Stock is reserved only after acceptance.</p>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1.5 text-sm font-medium text-[#59695d] ring-1 ring-[#e3e9df]">{orders.length} total</span>
+          </div>
+          <OrderList emptyMessage="New buyer requests will appear here." orders={orders} viewerRole="seller" />
+        </section>
       )}
 
       {!isAdmin && <section className="rounded-2xl border border-[#e4e9e1] bg-white p-5 sm:p-7">
@@ -147,9 +177,7 @@ export function SellerDashboard({ isAdmin, products, listings }: SellerDashboard
                       {listing.quantity_available.toLocaleString()} {listing.unit} · KSh {listing.price_per_unit.toLocaleString()} / {listing.unit} · {listing.location}
                     </p>
                     {isAdmin && (
-                      <p className="mt-1 text-xs text-[#778278]">
-                        Seller: {listing.seller_name} · {listing.seller_email}
-                      </p>
+                      <p className="mt-1 text-xs text-[#778278]">Seller: {listing.seller_name}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-3">

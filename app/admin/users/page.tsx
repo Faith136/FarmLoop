@@ -9,21 +9,23 @@ export const metadata: Metadata = {
   description: "View buyer and seller accounts and their status.",
 };
 
-async function AccountsTable() {
+async function AccountsTable({ roleFilter }: { roleFilter: "buyer" | "seller" | null }) {
   const { supabase } = await requireRole("admin");
   const { data: profiles, error } = await supabase
     .from("profiles")
     .select("id, display_name, email, role, is_suspended, last_login_at, created_at")
-    .in("role", ["buyer", "seller"])
+    .in("role", roleFilter ? [roleFilter] : ["buyer", "seller"])
     .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Could not load buyer and seller accounts: ${error.message}`);
   }
 
+  const accountType = roleFilter ?? "buyer or seller";
+
   return (
-    <section aria-label="Buyer and seller accounts" className="overflow-x-auto rounded-2xl border border-[#e4e9e1] bg-white">
-      <table className="w-full min-w-[760px] text-left text-sm">
+    <section aria-label={`${accountType} accounts`} className="overflow-x-auto rounded-2xl border border-[#e4e9e1] bg-white">
+      <table className="w-full min-w-190 text-left text-sm">
         <thead className="bg-[#f7f8f3] text-xs uppercase tracking-wide text-[#778278]">
           <tr>
             <th className="px-5 py-3 font-semibold">Name</th>
@@ -63,7 +65,7 @@ async function AccountsTable() {
           {profiles.length === 0 && (
             <tr>
               <td className="px-5 py-10 text-center text-[#778278]" colSpan={6}>
-                No buyer or seller accounts found.
+                No {accountType} accounts found.
               </td>
             </tr>
           )}
@@ -73,15 +75,44 @@ async function AccountsTable() {
   );
 }
 
-export default function AdminUsersPage() {
+interface AdminUsersPageProps {
+  searchParams: Promise<{ role?: string | string[] }>;
+}
+
+async function AdminUsersContent({ searchParams }: AdminUsersPageProps) {
+  const params = await searchParams;
+  const roleFilter =
+    params.role === "buyer" || params.role === "seller" ? params.role : null;
+  const title =
+    roleFilter === "seller"
+      ? "Seller accounts"
+      : roleFilter === "buyer"
+        ? "Buyer accounts"
+        : "Buyer and seller accounts";
+  const description =
+    roleFilter === "seller"
+      ? "Review seller accounts, account status, and recent sign-in activity."
+      : roleFilter === "buyer"
+        ? "Review buyer accounts, account status, and recent sign-in activity."
+        : "View account details and manage buyer or seller access. Account suspension is separate from listing moderation.";
+
   return (
     <AdminLayout
-      description="View account details and manage buyer or seller access. Account suspension is separate from listing moderation."
-      title="Buyer and seller accounts"
+      activeSection={roleFilter === "seller" ? "sellers" : roleFilter === "buyer" ? "buyers" : undefined}
+      description={description}
+      title={title}
     >
       <Suspense fallback={<p className="text-sm text-[#778278]">Loading accounts…</p>}>
-        <AccountsTable />
+        <AccountsTable roleFilter={roleFilter} />
       </Suspense>
     </AdminLayout>
+  );
+}
+
+export default function AdminUsersPage(props: AdminUsersPageProps) {
+  return (
+    <Suspense fallback={<p className="px-6 py-10 text-sm text-[#778278]">Loading accounts…</p>}>
+      <AdminUsersContent searchParams={props.searchParams} />
+    </Suspense>
   );
 }
