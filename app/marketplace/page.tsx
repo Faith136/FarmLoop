@@ -28,7 +28,7 @@ async function MarketplaceContent() {
             </p>
           </div>
           <p className="shrink-0 rounded-full bg-white px-4 py-2 text-sm font-medium text-[#59695d] shadow-sm ring-1 ring-[#e3e9df]">
-            <span className="font-semibold text-[#315c3b]">{listings.length}</span> available listings
+            <span className="font-semibold text-[#315c3b]">{listings.length}</span> active listings
           </p>
         </div>
         <Suspense fallback={<div className="pt-8 text-sm text-[#778278]">Loading materials...</div>}>

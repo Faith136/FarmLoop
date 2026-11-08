@@ -113,7 +113,9 @@ export default function MessagesPage() {
         <header className="mb-7">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#78916c]">Your workspace</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-[#213d2b]">Messages</h1>
-          <p className="mt-2 text-sm leading-6 text-[#68766b]">Private buyer-seller conversations linked to accepted orders.</p>
+          <p className="mt-2 text-sm leading-6 text-[#68766b]">
+            Private conversations stay saved here, with a separate thread for each accepted order.
+          </p>
         </header>
         <Suspense fallback={<p className="text-sm text-[#778278]">Loading conversations…</p>}>
           <MessageInbox />

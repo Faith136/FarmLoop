@@ -25,6 +25,7 @@ export function ListingCard({ listing, canRequest }: ListingCardProps) {
     month: "short",
     year: "numeric",
   });
+  const isAvailableNow = listing.availableFrom <= new Date().toISOString().slice(0, 10);
 
   function submitRequest(formData: FormData) {
     setNotice({});
@@ -87,19 +88,24 @@ export function ListingCard({ listing, canRequest }: ListingCardProps) {
         </div>
         {canRequest && (
           <button
-          className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl bg-[#315c3b] px-4 text-sm font-semibold text-white transition hover:bg-[#24492e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315c3b]"
-          onClick={() => {
-            setNotice({});
-            setIsRequestOpen((open) => !open);
-          }}
-          type="button"
+            className="mt-4 flex min-h-11 w-full items-center justify-center rounded-xl bg-[#315c3b] px-4 text-sm font-semibold text-white transition hover:bg-[#24492e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315c3b] disabled:cursor-not-allowed disabled:bg-[#89948a]"
+            disabled={!isAvailableNow}
+            onClick={() => {
+              setNotice({});
+              setIsRequestOpen((open) => !open);
+            }}
+            type="button"
           >
-          {isRequestOpen ? "Close request form" : "Request this product"}
+            {!isAvailableNow
+              ? `Available from ${availableFrom}`
+              : isRequestOpen
+                ? "Close request form"
+                : "Request this product"}
           </button>
         )}
         {notice.error && <p aria-live="polite" className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">{notice.error}</p>}
         {notice.success && <p aria-live="polite" className="mt-3 rounded-lg bg-[#edf4e9] px-3 py-2 text-sm text-[#315c3b]">{notice.success}</p>}
-        {canRequest && isRequestOpen && (
+        {canRequest && isAvailableNow && isRequestOpen && (
           <form action={submitRequest} className="mt-4 space-y-3 rounded-xl bg-[#f7f8f3] p-4">
             <input name="listingId" type="hidden" value={listing.id} />
             <label className="block text-xs font-semibold text-[#405847]">

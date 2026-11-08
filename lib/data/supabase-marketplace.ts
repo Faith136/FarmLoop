@@ -15,7 +15,6 @@ export async function getMarketplaceListings(): Promise<MarketplaceListing[]> {
     .select("id, seller_id, seller_name, product_id, quantity_available, unit, price_per_unit, location, condition, available_from, available_until, status")
     .eq("status", "active")
     .gt("quantity_available", 0)
-    .lte("available_from", today)
     .gte("available_until", today)
     .order("created_at", { ascending: false });
 

@@ -2,9 +2,10 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { NotificationPopup } from "@/components/orders/notification-popup";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import type { UserRole } from "@/lib/supabase/database.types";
+import type { NotificationRow, UserRole } from "@/lib/supabase/database.types";
 
 export function SiteHeader() {
   return (
@@ -37,7 +38,9 @@ async function SiteHeaderContent() {
     label: string;
     displayName: string;
     role: UserRole;
+    userId: string;
   } | null = null;
+  let notifications: NotificationRow[] = [];
 
   if (isSupabaseConfigured()) {
     await connection();
@@ -60,11 +63,28 @@ async function SiteHeaderContent() {
         label: profile.role === "admin" ? "Admin dashboard" : profile.role === "seller" ? "Seller workspace" : "Buyer workspace",
         displayName: profile.display_name,
         role: profile.role,
+        userId: userData.user.id,
       };
+
+      if (profile.role === "buyer" || profile.role === "seller") {
+        const { data: unreadNotifications, error: notificationsError } = await supabase
+          .from("notifications")
+          .select("id, user_id, order_id, conversation_id, notification_type, title, body, href, created_at, read_at")
+          .eq("user_id", userData.user.id)
+          .is("read_at", null)
+          .order("created_at", { ascending: false })
+          .limit(10);
+
+        if (notificationsError) {
+          throw new Error(`Could not load your unread notifications: ${notificationsError.message}`);
+        }
+        notifications = unreadNotifications;
+      }
     }
   }
 
   return (
+    <>
     <header className="border-b border-[#e6eae2] bg-[#f7f8f3]/90">
       <div className="mx-auto flex h-19 max-w-7xl items-center justify-between px-6 sm:px-10 lg:px-12">
         <Link aria-label="FarmLoop home" className="flex items-center gap-2.5" href="/">
@@ -122,5 +142,9 @@ async function SiteHeaderContent() {
         </nav>
       </div>
     </header>
+    {account && (account.role === "buyer" || account.role === "seller") && (
+      <NotificationPopup initialNotifications={notifications} userId={account.userId} />
+    )}
+    </>
   );
 }
