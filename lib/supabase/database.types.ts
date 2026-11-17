@@ -145,6 +145,19 @@ export type OrderTimelineRow = {
   occurred_at: string;
 };
 
+export type ChatbotMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type ChatbotConversationRow = {
+  id: string;
+  user_id: string;
+  messages: ChatbotMessage[];
+  created_at: string;
+  updated_at: string;
+};
+
 export interface Database {
   public: {
     Tables: {
@@ -187,6 +200,12 @@ export interface Database {
         MessageRow,
         Pick<MessageRow, "conversation_id" | "sender_id" | "body">,
         never
+      >;
+      chatbot_conversations: Table<
+        ChatbotConversationRow,
+        Pick<ChatbotConversationRow, "user_id" | "messages"> &
+          Partial<Pick<ChatbotConversationRow, "updated_at">>,
+        Partial<Pick<ChatbotConversationRow, "messages" | "updated_at">>
       >;
       notifications: Table<
         NotificationRow,

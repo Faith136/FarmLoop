@@ -4,6 +4,16 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Database } from "@/lib/supabase/database.types";
 
 export async function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const isAdminLogin = pathname === "/admin/login";
+  const requiresAuthentication =
+    !isAdminLogin &&
+    /^\/(admin|seller|buyer|settings|marketplace)(\/|$)/.test(pathname);
+
+  if (!requiresAuthentication) {
+    return NextResponse.next({ request });
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.next({ request });
   }
@@ -33,13 +43,8 @@ export async function proxy(request: NextRequest) {
   });
 
   const { data, error } = await supabase.auth.getUser();
-  const { pathname, search } = request.nextUrl;
-  const isAdminLogin = pathname === "/admin/login";
-  const requiresAuthentication =
-    !isAdminLogin &&
-    /^\/(admin|seller|buyer|settings|marketplace)(\/|$)/.test(pathname);
 
-  if (requiresAuthentication && (error || !data.user)) {
+  if (error || !data.user) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = pathname.startsWith("/admin") ? "/admin/login" : "/auth";
     loginUrl.search = "";
