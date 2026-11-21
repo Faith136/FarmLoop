@@ -27,7 +27,7 @@ function statusStyle(status: OrderRow["status"]) {
   if (status === "accepted" || status === "ready_for_collection" || status === "completed") {
     return "bg-[#edf4e9] text-[#315c3b]";
   }
-  if (status === "rejected") return "bg-red-50 text-[#934b42]";
+  if (status === "rejected" || status === "cancelled") return "bg-red-50 text-[#934b42]";
   if (status === "countered") return "bg-amber-50 text-amber-800";
   return "bg-[#f3f6f0] text-[#667468]";
 }

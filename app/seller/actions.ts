@@ -92,7 +92,7 @@ export async function createSellerListing(
 export async function updateSellerListingStatus(
   formData: FormData,
 ): Promise<SellerActionResult> {
-  const { supabase } = await requireRole("seller");
+  const { supabase, user } = await requireRole("seller");
   const listingId = value(formData, "listingId");
   const status = value(formData, "status");
 
@@ -101,6 +101,28 @@ export async function updateSellerListingStatus(
     (status !== "active" && status !== "paused" && status !== "sold_out")
   ) {
     return { error: "Choose a valid listing and status." };
+  }
+
+  const { data: listing } = await supabase
+    .from("seller_listings")
+    .select("quantity_available, available_until")
+    .eq("id", listingId)
+    .eq("seller_id", user.id)
+    .maybeSingle();
+
+  if (!listing) {
+    return { error: "Listing not found." };
+  }
+
+  if (
+    status === "active" &&
+    (listing.quantity_available <= 0 ||
+      listing.available_until < new Date().toISOString().slice(0, 10))
+  ) {
+    return {
+      error:
+        "This listing cannot be active while its quantity is zero or its availability period has expired.",
+    };
   }
 
   const { error } = await supabase

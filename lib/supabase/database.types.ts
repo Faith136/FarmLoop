@@ -72,6 +72,7 @@ export type OrderStatus =
   | "countered"
   | "accepted"
   | "rejected"
+  | "cancelled"
   | "ready_for_collection"
   | "completed";
 
@@ -240,6 +241,10 @@ export interface Database {
         Args: { p_order_id: string; p_explanation?: string | null };
         Returns: string;
       };
+      cancel_order_request: {
+        Args: { p_order_id: string };
+        Returns: string;
+      };
       propose_order_change: {
         Args: {
           p_order_id: string;
@@ -259,6 +264,10 @@ export interface Database {
       };
       mark_conversation_read: {
         Args: { p_conversation_id: string };
+        Returns: undefined;
+      };
+      sync_expired_listing_statuses: {
+        Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
     };

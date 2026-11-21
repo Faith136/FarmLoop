@@ -9,6 +9,7 @@ export async function getMarketplaceListings(): Promise<MarketplaceListing[]> {
   }
 
   const supabase = await createSupabaseServerClient();
+  await supabase.rpc("sync_expired_listing_statuses");
   const today = new Date().toISOString().slice(0, 10);
   const { data: listings, error } = await supabase
     .from("seller_listings")

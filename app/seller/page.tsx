@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 async function SellerWorkspace() {
   await connection();
   const { supabase, user, profile } = await requireRole("seller");
+  await supabase.rpc("sync_expired_listing_statuses");
   const [productsResult, listingsResult] = await Promise.all([
     supabase
       .from("catalogue_products")
