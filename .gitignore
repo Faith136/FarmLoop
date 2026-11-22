@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+
+# Temporary API testing routes
+app/api/test-chunking/
+app/api/test-retrieval/
+app/api/test-embedding/

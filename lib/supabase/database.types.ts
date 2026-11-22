@@ -159,6 +159,22 @@ export type ChatbotConversationRow = {
   updated_at: string;
 };
 
+export type AgriculturalKnowledgeRow = {
+  id: string;
+  document_id: string;
+  content: string;
+  embedding: number[];
+  metadata: Record<string, unknown>;
+  created_at: string;
+};
+
+export type AgriculturalKnowledgeMatchRow = Pick<
+  AgriculturalKnowledgeRow,
+  "id" | "document_id" | "content" | "metadata"
+> & {
+  similarity: number;
+};
+
 export interface Database {
   public: {
     Tables: {
@@ -207,6 +223,15 @@ export interface Database {
         Pick<ChatbotConversationRow, "user_id" | "messages"> &
           Partial<Pick<ChatbotConversationRow, "updated_at">>,
         Partial<Pick<ChatbotConversationRow, "messages" | "updated_at">>
+      >;
+      agricultural_knowledge: Table<
+        AgriculturalKnowledgeRow,
+        Pick<
+          AgriculturalKnowledgeRow,
+          "document_id" | "content" | "embedding" | "metadata"
+        > &
+          Partial<Pick<AgriculturalKnowledgeRow, "id" | "created_at">>,
+        never
       >;
       notifications: Table<
         NotificationRow,
@@ -269,6 +294,14 @@ export interface Database {
       sync_expired_listing_statuses: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
+      };
+      match_agricultural_knowledge: {
+        Args: {
+          query_embedding: number[];
+          match_threshold: number;
+          match_count: number;
+        };
+        Returns: AgriculturalKnowledgeMatchRow[];
       };
     };
     Enums: Record<string, never>;
